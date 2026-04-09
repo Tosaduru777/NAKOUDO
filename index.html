@@ -1,0 +1,494 @@
+
+<h2 class="sr-only">NAKOUDО — 知らないキャラクターとのお見合いゲーム</h2>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+.bg{min-height:600px;background-color:#fdf0f4;background-image:radial-gradient(circle at 15% 15%,#fce4ec 0%,transparent 45%),radial-gradient(circle at 85% 85%,#fce4ec 0%,transparent 45%);padding:1.2rem 1rem 3rem;position:relative;overflow:hidden;}
+.bg::before{content:'♡ ♡ ♡ ♡ ♡ ♡ ♡ ♡ ♡ ♡ ♡ ♡ ♡ ♡ ♡ ♡ ♡ ♡ ♡ ♡ ♡ ♡ ♡ ♡ ♡ ♡ ♡ ♡ ♡ ♡ ♡ ♡';position:absolute;top:0;left:0;right:0;bottom:0;font-size:26px;line-height:2.3;color:#f8bbd0;opacity:.15;word-break:break-all;pointer-events:none;letter-spacing:8px;}
+.page-header{position:absolute;top:1rem;left:1rem;z-index:2;}
+.page-link{display:inline-block;color:#c2185b;font-size:14px;font-weight:700;letter-spacing:.15em;text-decoration:none;cursor:pointer;padding:.4rem .8rem;border:1px solid rgba(194,24,91,.2);border-radius:999px;background:rgba(255,255,255,.88);box-shadow:0 6px 20px rgba(233,30,99,.06);}
+.page-link:hover{opacity:.88;}
+.app{font-family:'Hiragino Sans','Yu Gothic UI','Meiryo',sans-serif;max-width:500px;margin:0 auto;position:relative;}
+.card{background:white;border-radius:20px;padding:1.8rem 1.5rem;box-shadow:0 4px 24px rgba(233,30,99,.10);}
+.screen{display:none;}.screen.active{display:block;}
+@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-10px)}}
+@keyframes sparkle{0%,100%{opacity:0;transform:scale(0)}50%{opacity:1;transform:scale(1)}}
+@keyframes pulse{0%,100%{opacity:.4}50%{opacity:1}}
+@keyframes blink{0%,90%,100%{transform:scaleY(1)}95%{transform:scaleY(0.1)}}
+.majin-wrap{display:flex;justify-content:center;margin-bottom:.8rem;}
+.majin-wrap svg{animation:float 3s ease-in-out infinite;}
+.sp1{animation:sparkle 2s ease-in-out infinite 0s;}.sp2{animation:sparkle 2s ease-in-out infinite .5s;}.sp3{animation:sparkle 2s ease-in-out infinite 1s;}.sp4{animation:sparkle 2s ease-in-out infinite 1.5s;}
+.eye-l,.eye-r{animation:blink 4s ease-in-out infinite;}
+.logo{font-family:'Hiragino Mincho ProN','Yu Mincho','Georgia',serif;font-size:2rem;font-weight:700;color:#c2185b;letter-spacing:.15em;text-align:center;cursor:pointer;}
+.logo:hover{opacity:.82;}
+.logo-sub{text-align:center;font-size:11px;color:#f48fb1;letter-spacing:.35em;margin-top:2px;margin-bottom:.6rem;}
+.bubble{background:#fff0f5;border:1.5px solid #f8bbd0;border-radius:14px;padding:.7rem 1.1rem;font-size:13px;color:#c2185b;text-align:center;margin-bottom:1rem;position:relative;line-height:1.7;}
+.bubble::after{content:'';position:absolute;top:-10px;left:50%;transform:translateX(-50%);border:5px solid transparent;border-bottom-color:#f8bbd0;}
+.bubble::before{content:'';position:absolute;top:-8px;left:50%;transform:translateX(-50%);border:5px solid transparent;border-bottom-color:#fff0f5;z-index:1;}
+.title-desc{text-align:center;font-size:13px;color:#888;line-height:1.9;margin-bottom:1rem;}
+.gender-select{display:flex;gap:8px;margin-bottom:1.5rem;justify-content:center;}
+.gender-btn{background:#fce4ec;color:#c2185b;border:1.5px solid #f48fb1;padding:10px 16px;font-size:13px;border-radius:50px;font-family:inherit;cursor:pointer;transition:all .2s;}
+.gender-btn:hover{background:#f48fb1;color:white;}
+.gender-btn.selected{background:#e91e63;color:white;border-color:#e91e63;}
+.badge{display:inline-block;background:#fce4ec;color:#c2185b;font-size:12px;padding:5px 16px;border-radius:20px;margin-bottom:1.2rem;font-weight:500;}
+.title-wrap{display:flex;flex-direction:column;align-items:center;}
+.main-btn{background:linear-gradient(135deg,#e91e63,#c2185b);color:white;border:none;padding:14px 2.5rem;font-size:15px;border-radius:50px;font-family:inherit;letter-spacing:.1em;cursor:pointer;box-shadow:0 3px 14px rgba(194,24,91,.3);}
+.main-btn:hover{opacity:.88;}
+.loading-card{text-align:center;padding:1.5rem 1rem 2rem;}
+.loading-hearts{font-size:28px;letter-spacing:6px;margin-bottom:1rem;animation:pulse 1.2s ease-in-out infinite;}
+.loading-msg{font-size:14px;color:#aaa;}
+.majin-mini{display:flex;justify-content:center;margin-bottom:1rem;}
+.game-hd{display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem;}
+.logo-sm{font-family:'Hiragino Mincho ProN','Yu Mincho','Georgia',serif;font-size:15px;font-weight:700;color:#c2185b;letter-spacing:.1em;cursor:pointer;}
+.logo-sm:hover{opacity:.85;}
+.q-counter{font-size:12px;color:#bbb;}.q-num{font-size:17px;font-weight:600;color:#c2185b;}
+.prog-bar{height:4px;background:#fce4ec;border-radius:2px;margin-bottom:1rem;overflow:hidden;}
+.prog-fill{height:100%;background:linear-gradient(90deg,#f48fb1,#c2185b);border-radius:2px;transition:width .4s ease;width:0%;}
+.log-area{min-height:0;margin-bottom:.5rem;}
+.log-item{margin-bottom:.9rem;}
+.log-item.assistant{display:flex;gap:12px;align-items:flex-start;}
+.assistant-avatar{width:48px;min-width:48px;height:48px;border-radius:50%;background:#fff0f5;border:1px solid #f8bbd0;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 12px rgba(233,30,99,.08);}
+.assistant-avatar svg{width:28px;height:28px;}
+.assistant-bubble{flex:1;}
+.log-q{position:relative;display:inline-block;background:#fff0f5;border:1px solid #f8bbd0;border-radius:18px;padding:14px 16px;font-size:14px;color:#333;line-height:1.7;}
+.log-q::after{content:'';position:absolute;bottom:-10px;left:30px;border-width:10px 10px 0 10px;border-style:solid;border-color:#fff0f5 transparent transparent transparent;}
+.log-a{font-size:16px;font-weight:600;color:#333;}
+.log-a.yes{color:#2e7d32;}.log-a.no{color:#c62828;}.log-a.partial{color:#f57c00;}.log-a.not{color:#d32f2f;}.log-a.unknown{color:#9e9e9e;}
+.divider{border:none;border-top:1px solid #fce4ec;margin:0 0 1rem;}
+.input-row{display:flex;gap:8px;margin-bottom:.75rem;}
+.q-in{flex:1;padding:11px 14px;font-size:14px;font-family:inherit;border:1.5px solid #f48fb1;border-radius:50px;background:white;color:#333;outline:none;}
+.q-in:focus{border-color:#c2185b;}
+.ask-btn{background:linear-gradient(135deg,#e91e63,#c2185b);color:white;border:none;padding:11px 16px;font-size:14px;border-radius:50px;font-family:inherit;cursor:pointer;white-space:nowrap;}
+.ask-btn:hover{opacity:.85;}.ask-btn:disabled,.q-in:disabled,.give-btn:disabled{opacity:.4;cursor:not-allowed;}
+.give-btn{background:none;border:1.5px solid #f48fb1;color:#e91e63;padding:10px 16px;font-size:13px;border-radius:50px;font-family:inherit;cursor:pointer;width:100%;}
+.answer-row{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:8px;margin-bottom:.75rem;}
+.answer-btn{background:#fce4ec;color:#c2185b;border:1.5px solid #f48fb1;padding:11px 10px;font-size:13px;border-radius:999px;font-family:inherit;cursor:pointer;transition:all .2s;white-space:normal;line-height:1.3;}
+.answer-btn:hover{background:#f48fb1;color:white;}
+.answer-btn:disabled{opacity:.4;cursor:not-allowed;}
+@media (max-width:540px){
+  .bg{padding:1rem .8rem 2rem;}
+  .card{padding:1.4rem 1.1rem;}
+  .logo{font-size:1.6rem;}
+  .logo-sub{font-size:10px;letter-spacing:.3em;}
+  .title-desc,.bubble,.loading-msg,.reveal-card{font-size:13px;}
+  .gender-select{flex-wrap:wrap;justify-content:center;gap:6px;}
+  .gender-btn{flex:1 1 48%;padding:10px 12px;font-size:12px;}
+  .answer-row{grid-template-columns:repeat(2,minmax(0,1fr));}
+  .answer-btn{font-size:12px;padding:10px 8px;}
+  .q-counter{font-size:11px;}
+  .q-num{font-size:16px;}
+  .reveal-top{flex-direction:column;align-items:flex-start;gap:.75rem;}
+  .btn-row{flex-direction:column;}
+}
+.give-btn:hover{background:#fce4ec;}
+.err-msg{font-size:12px;color:#c62828;text-align:center;margin-top:.5rem;}
+.reveal-top{display:flex;align-items:center;gap:1rem;margin-bottom:1rem;}
+.reveal-card{background:#fff8fa;border-radius:14px;border:1.5px solid #f8bbd0;padding:1.2rem;margin-bottom:1.2rem;font-size:14px;line-height:1.9;color:#333;white-space:pre-wrap;}
+.btn-row{display:flex;gap:10px;margin-bottom:.6rem;}
+.pass-btn{flex:1;background:none;border:1.5px solid #ddd;color:#aaa;padding:12px;font-size:14px;border-radius:50px;font-family:inherit;cursor:pointer;}
+.like-btn{flex:1;background:linear-gradient(135deg,#e91e63,#c2185b);color:white;border:none;padding:12px;font-size:14px;border-radius:50px;font-family:inherit;cursor:pointer;}
+.like-btn:hover{opacity:.88;}
+.fin-msg{font-size:12px;color:#ccc;text-align:center;}
+.exh-wrap{text-align:center;padding:2rem 1rem;}
+.exh-title{font-family:'Hiragino Mincho ProN','Yu Mincho','Georgia',serif;font-size:20px;color:#c2185b;margin-bottom:.8rem;}
+.exh-msg{font-size:14px;color:#888;line-height:1.9;}
+.speech-scene{margin-bottom:.4rem;}
+.speech-q-no{font-size:11px;color:#f48fb1;letter-spacing:.1em;margin-bottom:3px;}
+.speech-bubble{background:#fff0f5;border:1.5px solid #f8bbd0;border-radius:14px;padding:12px 14px;font-size:14px;color:#333;line-height:1.7;position:relative;min-height:48px;}
+.speech-bubble::after{content:'';position:absolute;bottom:-11px;left:30px;border:6px solid transparent;border-top-color:#f8bbd0;}
+.speech-bubble::before{content:'';position:absolute;bottom:-9px;left:31px;border:5px solid transparent;border-top-color:#fff0f5;z-index:1;}
+.speech-char{margin-top:2px;margin-left:6px;}
+.log-hist{font-size:12px;color:#999;padding:.35rem .7rem;border-left:2px solid #fce4ec;margin-bottom:.4rem;line-height:1.6;}
+.log-hist b{color:#c2185b;}
+.search-share-row{display:flex;gap:8px;margin-bottom:.75rem;flex-wrap:wrap;}
+.ss-btn{flex:1;min-width:0;padding:10px 8px;font-size:13px;border-radius:50px;font-family:inherit;cursor:pointer;border:1.5px solid #f48fb1;background:none;color:#e91e63;transition:all .2s;}
+.ss-btn:hover{background:#fce4ec;}
+.ss-btn.x-btn{background:#000;color:white;border-color:#000;}
+.ss-btn.x-btn:hover{background:#333;}
+.ss-btn.line-btn{background:#06c755;color:white;border-color:#06c755;}
+.ss-btn.line-btn:hover{background:#05b34c;}
+</style>
+
+<div class="bg"><div class="page-header"><div class="page-link" onclick="backToTitle()" role="button" tabindex="0">NAKOUDO</div></div><div class="app">
+
+  <div id="s-title" class="screen active">
+    <div class="card">
+      <div class="title-wrap">
+        <div class="majin-wrap">
+          <svg width="140" height="180" viewBox="0 0 140 180" xmlns="http://www.w3.org/2000/svg">
+            <defs><radialGradient id="glow" cx="50%" cy="50%" r="50%"><stop offset="0%" stop-color="#fce4ec" stop-opacity="0.8"/><stop offset="100%" stop-color="#fce4ec" stop-opacity="0"/></radialGradient></defs>
+            <ellipse cx="70" cy="130" rx="45" ry="30" fill="url(#glow)"/>
+            <g class="sp1"><text x="12" y="55" font-size="14" fill="#f48fb1">✦</text></g>
+            <g class="sp2"><text x="112" y="45" font-size="12" fill="#f06292">✦</text></g>
+            <g class="sp3"><text x="18" y="100" font-size="10" fill="#f48fb1">✦</text></g>
+            <g class="sp4"><text x="106" y="105" font-size="11" fill="#f06292">✦</text></g>
+            <ellipse cx="70" cy="158" rx="28" ry="12" fill="#f48fb1" opacity=".4"/>
+            <path d="M42 130 Q35 155 70 162 Q105 155 98 130 Z" fill="#c2185b"/>
+            <path d="M50 130 Q48 148 70 153 Q92 148 90 130 Z" fill="#e91e63"/>
+            <rect x="46" y="118" width="48" height="14" rx="4" fill="#880e4f"/>
+            <rect x="58" y="116" width="24" height="8" rx="4" fill="#ad1457"/>
+            <path d="M44 80 Q40 100 42 120 L98 120 Q100 100 96 80 Z" fill="#e91e63"/>
+            <path d="M70 80 L62 120 L78 120 Z" fill="#c2185b"/>
+            <path d="M70 80 L58 95 L70 90 L82 95 Z" fill="white" opacity=".7"/>
+            <ellipse cx="70" cy="52" rx="28" ry="30" fill="#ffd8c8"/>
+            <path d="M42 40 Q45 18 70 16 Q95 18 98 40 Q90 30 70 28 Q50 30 42 40Z" fill="#4a148c"/>
+            <ellipse cx="40" cy="48" rx="8" ry="10" fill="#4a148c"/>
+            <ellipse cx="100" cy="48" rx="8" ry="10" fill="#4a148c"/>
+            <line x1="34" y1="38" x2="34" y2="22" stroke="#f48fb1" stroke-width="2"/><circle cx="34" cy="20" r="4" fill="#e91e63"/><circle cx="34" cy="20" r="2" fill="white"/>
+            <line x1="106" y1="38" x2="108" y2="22" stroke="#f48fb1" stroke-width="2"/><circle cx="108" cy="20" r="4" fill="#e91e63"/><circle cx="108" cy="20" r="2" fill="white"/>
+            <path d="M55 44 Q60 41 65 44" stroke="#7b1fa2" stroke-width="1.5" fill="none" stroke-linecap="round"/>
+            <path d="M75 44 Q80 41 85 44" stroke="#7b1fa2" stroke-width="1.5" fill="none" stroke-linecap="round"/>
+            <g class="eye-l" style="transform-origin:60px 52px"><ellipse cx="60" cy="52" rx="6" ry="7" fill="white"/><ellipse cx="60" cy="53" rx="4" ry="5" fill="#7b1fa2"/><ellipse cx="60" cy="53" rx="2.5" ry="3" fill="#1a0030"/><circle cx="62" cy="51" r="1.2" fill="white"/></g>
+            <g class="eye-r" style="transform-origin:80px 52px"><ellipse cx="80" cy="52" rx="6" ry="7" fill="white"/><ellipse cx="80" cy="53" rx="4" ry="5" fill="#7b1fa2"/><ellipse cx="80" cy="53" rx="2.5" ry="3" fill="#1a0030"/><circle cx="82" cy="51" r="1.2" fill="white"/></g>
+            <ellipse cx="52" cy="60" rx="7" ry="4" fill="#f48fb1" opacity=".4"/>
+            <ellipse cx="88" cy="60" rx="7" ry="4" fill="#f48fb1" opacity=".4"/>
+            <ellipse cx="70" cy="60" rx="2" ry="1.5" fill="#e8a898"/>
+            <path d="M63 67 Q70 73 77 67" stroke="#e91e63" stroke-width="1.8" fill="none" stroke-linecap="round"/>
+            <g transform="rotate(-30, 100, 105)"><path d="M98 98 Q110 82 122 88 Q118 100 106 104 Z" fill="#f48fb1" stroke="#c2185b" stroke-width="1"/><path d="M98 98 Q112 85 120 94 Q115 105 103 107 Z" fill="#fce4ec" stroke="#f48fb1" stroke-width=".5"/><line x1="98" y1="98" x2="122" y2="88" stroke="#c2185b" stroke-width=".8"/><line x1="98" y1="98" x2="120" y2="94" stroke="#c2185b" stroke-width=".8"/><line x1="98" y1="98" x2="116" y2="100" stroke="#c2185b" stroke-width=".8"/><line x1="98" y1="98" x2="110" y2="107" stroke="#c2185b" stroke-width=".8"/><line x1="98" y1="98" x2="103" y2="107" stroke="#c2185b" stroke-width=".8"/><rect x="94" y="98" width="4" height="16" rx="2" fill="#880e4f"/></g>
+            <text x="22" y="75" font-size="10" fill="#f48fb1" opacity=".7">♡</text>
+            <text x="108" y="75" font-size="10" fill="#f48fb1" opacity=".7">♡</text>
+          </svg>
+        </div>
+        <div class="logo" onclick="backToTitle()" role="button" tabindex="0">NAKOUDО</div>
+        <div class="logo-sub">仲人 — キャラクターとのお見合い</div>
+        <div class="bubble">ご縁を結びにまいりました。</div>
+        <div class="title-desc">まずはお相手の性愛対象をお選びください。<br><span style="font-size:11px;color:#bbb;">Choose your preferred character gender.</span></div>
+        <div class="gender-select">
+          <button class="gender-btn" data-gender="男性">男性キャラクター<br><span style="font-size:11px;opacity:.7;">Male</span></button>
+          <button class="gender-btn" data-gender="女性">女性キャラクター<br><span style="font-size:11px;opacity:.7;">Female</span></button>
+          <button class="gender-btn" data-gender="オールOK">オールOK<br><span style="font-size:11px;opacity:.7;">Any</span></button>
+        </div>
+        <div class="title-desc">仲人の質問に5択で答えて、あなたの好みに合ったキャラクターを絞り込みます。<br><span style="font-size:11px;color:#bbb;">Answer 5-choice questions to find your perfect anime character match.</span></div>
+        <div id="rem-badge" class="badge">本日のご縁 残り 2回</div>
+        <button class="main-btn" id="start-btn" onclick="startGame()" disabled>♡ お見合いを始める</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="s-loading" class="screen">
+    <div class="card loading-card">
+      <div class="majin-mini">
+        <svg width="80" height="100" viewBox="0 0 140 180" xmlns="http://www.w3.org/2000/svg" style="animation:float 2s ease-in-out infinite">
+          <path d="M42 130 Q35 155 70 162 Q105 155 98 130 Z" fill="#c2185b"/><path d="M50 130 Q48 148 70 153 Q92 148 90 130 Z" fill="#e91e63"/>
+          <rect x="46" y="118" width="48" height="14" rx="4" fill="#880e4f"/>
+          <path d="M44 80 Q40 100 42 120 L98 120 Q100 100 96 80 Z" fill="#e91e63"/>
+          <path d="M70 80 L62 120 L78 120 Z" fill="#c2185b"/>
+          <ellipse cx="70" cy="52" rx="28" ry="30" fill="#ffd8c8"/>
+          <path d="M42 40 Q45 18 70 16 Q95 18 98 40 Q90 30 70 28 Q50 30 42 40Z" fill="#4a148c"/>
+          <ellipse cx="40" cy="48" rx="8" ry="10" fill="#4a148c"/><ellipse cx="100" cy="48" rx="8" ry="10" fill="#4a148c"/>
+          <ellipse cx="60" cy="52" rx="5" ry="6" fill="white"/><ellipse cx="60" cy="53" rx="3" ry="4" fill="#7b1fa2"/>
+          <ellipse cx="80" cy="52" rx="5" ry="6" fill="white"/><ellipse cx="80" cy="53" rx="3" ry="4" fill="#7b1fa2"/>
+          <ellipse cx="52" cy="60" rx="6" ry="3" fill="#f48fb1" opacity=".4"/><ellipse cx="88" cy="60" rx="6" ry="3" fill="#f48fb1" opacity=".4"/>
+          <path d="M63 67 Q70 73 77 67" stroke="#e91e63" stroke-width="2" fill="none" stroke-linecap="round"/>
+        </svg>
+      </div>
+      <div class="loading-hearts">♡ ♡ ♡</div>
+      <div class="loading-msg">仲人がお相手を選んでいます…</div>
+    </div>
+  </div>
+
+  <div id="s-game" class="screen">
+    <div class="card">
+      <div class="game-hd">
+        <div style="display:flex;align-items:center;gap:8px;">
+          <svg width="30" height="38" viewBox="0 0 140 180" xmlns="http://www.w3.org/2000/svg">
+            <path d="M42 130 Q35 155 70 162 Q105 155 98 130 Z" fill="#c2185b"/>
+            <path d="M44 80 Q40 100 42 120 L98 120 Q100 100 96 80 Z" fill="#e91e63"/>
+            <rect x="46" y="118" width="48" height="14" rx="4" fill="#880e4f"/>
+            <ellipse cx="70" cy="52" rx="28" ry="30" fill="#ffd8c8"/>
+            <path d="M42 40 Q45 18 70 16 Q95 18 98 40 Q90 30 70 28 Q50 30 42 40Z" fill="#4a148c"/>
+            <ellipse cx="40" cy="48" rx="8" ry="10" fill="#4a148c"/><ellipse cx="100" cy="48" rx="8" ry="10" fill="#4a148c"/>
+            <ellipse cx="60" cy="53" rx="4" ry="5" fill="#7b1fa2"/><ellipse cx="80" cy="53" rx="4" ry="5" fill="#7b1fa2"/>
+            <ellipse cx="52" cy="60" rx="6" ry="3" fill="#f48fb1" opacity=".5"/><ellipse cx="88" cy="60" rx="6" ry="3" fill="#f48fb1" opacity=".5"/>
+            <path d="M63 67 Q70 72 77 67" stroke="#e91e63" stroke-width="2" fill="none" stroke-linecap="round"/>
+          </svg>
+          <div class="logo-sm" onclick="backToTitle()" role="button" tabindex="0">NAKOUDО</div>
+        </div>
+        <div class="q-counter">第 <span id="qnum" class="q-num">0</span> 問 / 15問</div>
+      </div>
+      <div class="prog-bar"><div id="prog" class="prog-fill"></div></div>
+      <div class="speech-scene">
+        <div class="speech-q-no" id="q-no">第1問</div>
+        <div class="speech-bubble" id="q-bubble">少々お待ちください…</div>
+        <div class="speech-char">
+          <svg width="72" height="92" viewBox="0 0 140 180" xmlns="http://www.w3.org/2000/svg" style="animation:float 3s ease-in-out infinite">
+            <path d="M42 130 Q35 155 70 162 Q105 155 98 130 Z" fill="#c2185b"/><path d="M50 130 Q48 148 70 153 Q92 148 90 130 Z" fill="#e91e63"/>
+            <rect x="46" y="118" width="48" height="14" rx="4" fill="#880e4f"/>
+            <path d="M44 80 Q40 100 42 120 L98 120 Q100 100 96 80 Z" fill="#e91e63"/>
+            <path d="M70 80 L62 120 L78 120 Z" fill="#c2185b"/>
+            <ellipse cx="70" cy="52" rx="28" ry="30" fill="#ffd8c8"/>
+            <path d="M42 40 Q45 18 70 16 Q95 18 98 40 Q90 30 70 28 Q50 30 42 40Z" fill="#4a148c"/>
+            <ellipse cx="40" cy="48" rx="8" ry="10" fill="#4a148c"/><ellipse cx="100" cy="48" rx="8" ry="10" fill="#4a148c"/>
+            <g class="eye-l" style="transform-origin:60px 52px"><ellipse cx="60" cy="52" rx="6" ry="7" fill="white"/><ellipse cx="60" cy="53" rx="4" ry="5" fill="#7b1fa2"/><ellipse cx="60" cy="53" rx="2.5" ry="3" fill="#1a0030"/><circle cx="62" cy="51" r="1.2" fill="white"/></g>
+            <g class="eye-r" style="transform-origin:80px 52px"><ellipse cx="80" cy="52" rx="6" ry="7" fill="white"/><ellipse cx="80" cy="53" rx="4" ry="5" fill="#7b1fa2"/><ellipse cx="80" cy="53" rx="2.5" ry="3" fill="#1a0030"/><circle cx="82" cy="51" r="1.2" fill="white"/></g>
+            <ellipse cx="52" cy="60" rx="6" ry="3" fill="#f48fb1" opacity=".4"/><ellipse cx="88" cy="60" rx="6" ry="3" fill="#f48fb1" opacity=".4"/>
+            <path d="M63 67 Q70 73 77 67" stroke="#e91e63" stroke-width="1.8" fill="none" stroke-linecap="round"/>
+          </svg>
+        </div>
+      </div>
+      <div id="log" class="log-area" style="max-height:150px;overflow-y:auto;"></div>
+      <hr class="divider">
+      <div class="answer-row">
+        <button class="answer-btn" onclick="askQ('はい')">はい</button>
+        <button class="answer-btn" onclick="askQ('いいえ')">いいえ</button>
+        <button class="answer-btn" onclick="askQ('部分的にそう')">部分的に<br>そう</button>
+        <button class="answer-btn" onclick="askQ('そうじゃない')">部分的に<br>違う</button>
+        <button class="answer-btn" onclick="askQ('不明')">不明</button>
+      </div>
+      <div style="font-size:12px;color:#888;text-align:center;margin-bottom:1rem;">仲人の質問に答えて、5択であなたの好みを伝えてください。</div>
+      <button id="givebtn" class="give-btn" onclick="giveUp()">わかった！ / 降参する</button>
+      <div id="errmsg" class="err-msg" style="display:none"></div>
+    </div>
+  </div>
+
+  <div id="s-reveal" class="screen">
+    <div class="card">
+      <div class="reveal-top">
+        <svg width="56" height="72" viewBox="0 0 140 180" xmlns="http://www.w3.org/2000/svg" style="flex-shrink:0;animation:float 3s ease-in-out infinite">
+          <path d="M42 130 Q35 155 70 162 Q105 155 98 130 Z" fill="#c2185b"/>
+          <path d="M44 80 Q40 100 42 120 L98 120 Q100 100 96 80 Z" fill="#e91e63"/>
+          <rect x="46" y="118" width="48" height="14" rx="4" fill="#880e4f"/>
+          <ellipse cx="70" cy="52" rx="28" ry="30" fill="#ffd8c8"/>
+          <path d="M42 40 Q45 18 70 16 Q95 18 98 40 Q90 30 70 28 Q50 30 42 40Z" fill="#4a148c"/>
+          <ellipse cx="40" cy="48" rx="8" ry="10" fill="#4a148c"/><ellipse cx="100" cy="48" rx="8" ry="10" fill="#4a148c"/>
+          <ellipse cx="60" cy="53" rx="4" ry="5" fill="#7b1fa2"/><ellipse cx="80" cy="53" rx="4" ry="5" fill="#7b1fa2"/>
+          <ellipse cx="52" cy="60" rx="6" ry="3" fill="#f48fb1" opacity=".5"/><ellipse cx="88" cy="60" rx="6" ry="3" fill="#f48fb1" opacity=".5"/>
+          <path d="M63 67 Q70 72 77 67" stroke="#e91e63" stroke-width="2" fill="none" stroke-linecap="round"/>
+        </svg>
+        <div>
+          <div style="font-size:11px;color:#f48fb1;letter-spacing:.25em;margin-bottom:4px;">仲人よりご紹介</div>
+          <div style="font-size:13px;color:#c2185b;font-weight:500;">お相手をご紹介いたします♡</div>
+        </div>
+      </div>
+      <div id="reveal-card" class="reveal-card"></div>
+      <div class="search-share-row">
+        <button class="ss-btn" onclick="searchChar()">🔍 検索する</button>
+        <button class="ss-btn x-btn" onclick="shareX()">𝕏 ポスト</button>
+        <button class="ss-btn line-btn" onclick="shareLINE()">LINE</button>
+        <button class="ss-btn" id="insta-btn" onclick="shareNative()">📷 シェア</button>
+      </div>
+      <div class="btn-row">
+        <button class="pass-btn" onclick="backToTitle()">ご縁なし</button>
+        <button class="like-btn" onclick="backToTitle()">♡ 気になる！</button>
+      </div>
+      <div class="fin-msg" id="fin-msg"></div>
+    </div>
+  </div>
+
+  <div id="s-exh" class="screen">
+    <div class="card">
+      <div class="exh-wrap">
+        <div class="majin-mini" style="margin-bottom:.8rem;opacity:.5;">
+          <svg width="70" height="88" viewBox="0 0 140 180" xmlns="http://www.w3.org/2000/svg">
+            <path d="M42 130 Q35 155 70 162 Q105 155 98 130 Z" fill="#c2185b"/>
+            <path d="M44 80 Q40 100 42 120 L98 120 Q100 100 96 80 Z" fill="#e91e63"/>
+            <rect x="46" y="118" width="48" height="14" rx="4" fill="#880e4f"/>
+            <ellipse cx="70" cy="52" rx="28" ry="30" fill="#ffd8c8"/>
+            <path d="M42 40 Q45 18 70 16 Q95 18 98 40 Q90 30 70 28 Q50 30 42 40Z" fill="#4a148c"/>
+            <ellipse cx="40" cy="48" rx="8" ry="10" fill="#4a148c"/><ellipse cx="100" cy="48" rx="8" ry="10" fill="#4a148c"/>
+            <path d="M57 54 Q60 57 63 54" stroke="#7b1fa2" stroke-width="2" fill="none" stroke-linecap="round"/>
+            <path d="M77 54 Q80 57 83 54" stroke="#7b1fa2" stroke-width="2" fill="none" stroke-linecap="round"/>
+            <path d="M63 67 Q70 65 77 67" stroke="#e91e63" stroke-width="2" fill="none" stroke-linecap="round"/>
+          </svg>
+        </div>
+        <div class="exh-title">また明日</div>
+        <div class="exh-msg">本日のご縁は結び終えました。<br>明日またお越しください。</div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<div style="text-align:center;padding:1rem;font-size:12px;color:#999;max-width:500px;margin:0 auto;">
+  このサービスはフィクションキャラクターのみを扱います。実在の人物や肖像権に関する問題は一切関与しません。
+</div>
+
+<script>
+const MAX_Q=15,MAX_DAY=999;
+const VALID_ANSWERS=['はい','いいえ','部分的にそう','そうじゃない','不明'];
+let hist=[],qCount=0,busy=false,selectedGender=null,questionCount=0,currentQText='';
+const BASE_SYS=`あなたは「NAKOUDО（仲人）」というゲームの仲人魔神です。
+ゲーム開始前に、やや知名度の低いマニアックなフィクションキャラクター（アニメ・漫画・ゲーム・特撮・ライトノベルなど）を1人、心の中で決めています。
+有名すぎるキャラクター（ドラゴンボールの孫悟空、ワンピースのルフィなど）は避けてください。
+ポケモンから鬼滅からマイリトルポニーからアイマスまでカバーできると良いです。
+
+ルール：
+1. あなたが先に質問をして、ユーザーは必ず5択で答えます。ユーザーから質問をさせず、あなたが会話を進めてください。
+   質問はキャラクターの好みを尋ねる自然な会話形式にしてください。例えば「人間じゃないキャラクターって好きですか？」や「明るく元気で前向きな子が好きですか？」のように、短くフレンドリーな聞き方でお願いします。
+   最初の問いかけは長い前置きやあいさつをせず、すぐに本題の質問だけを提示してください。
+2. 仲人の質問に対してユーザーは次のいずれかで答えます：
+   - 「はい」
+   - 「いいえ」 
+   - 「部分的にそう」
+   - 「そうじゃない」
+   - 「不明」
+3. 「わかった」「降参」「教えて」「紹介して」などがあればキャラクターを丁寧に紹介してください。
+4. 紹介は「名前：〇〇　作品：〇〇　〇〇は〜という人物で、〜が特徴です。」の形で2〜3文にまとめてください。
+5. 絶対に自分からキャラクターを明かしてはいけません。
+6. ユーザーの性別の好みはゲーム開始前に確定済みです。質問の中で性別・性愛対象に関する質問は一切しないでください。選んだキャラクターは必ずユーザーの希望する性別と一致していなければなりません。`;
+
+function getSYS(){
+  let sys = BASE_SYS;
+  if(selectedGender && selectedGender !== 'オールOK'){
+    sys += `\n\nユーザーの希望：${selectedGender}キャラクターを選ぶこと。`;
+  } else {
+    sys += `\n\nユーザーの性別の好みは「オールOK（男女どちらでも可）」です。性別に関する質問は不要です。`;
+  }
+  return sys;
+}
+
+function gs(){try{const t=new Date().toDateString();const d=JSON.parse(localStorage.getItem('nkd_v5')||'{}');if(d.date!==t)return{date:t,count:0};return d;}catch{return{date:new Date().toDateString(),count:0};}}
+function ss(d){try{localStorage.setItem('nkd_v5',JSON.stringify(d));}catch{}}
+function rem(){return MAX_DAY>=999?Infinity:Math.max(0,MAX_DAY-gs().count);}
+function usePlay(){const d=gs();d.count++;ss(d);}
+function revertPlay(){const d=gs();d.count=Math.max(0,d.count-1);ss(d);}
+function show(id){document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));document.getElementById('s-'+id).classList.add('active');}
+function updateBadge(){document.getElementById('rem-badge').textContent=MAX_DAY>=999?'本日のご縁 無制限':`本日のご縁 残り ${rem()}回`;}
+function esc(t){return t.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+function setErr(msg){const el=document.getElementById('errmsg');if(!el)return;el.textContent=msg;el.style.display=msg?'block':'none';}
+
+async function api(messages){
+  const r=await fetch('/api/chat',{
+    method:'POST',
+    headers:{
+      'Content-Type':'application/json'
+    },
+    body:JSON.stringify({model:'claude-haiku-4-5-20251001',max_tokens:300,system:getSYS(),messages})
+  });
+  if(!r.ok){const e=await r.text();throw new Error(`API error ${r.status}: ${e}`);}
+  const d=await r.json();
+  if(!d.content||!d.content[0])throw new Error('レスポンス形式エラー');
+  return d.content[0].text;
+}
+
+async function startGame(){
+  if(rem()<=0){show('exh');return;}
+  usePlay();hist=[];qCount=0;
+  document.getElementById('log').innerHTML='';
+  document.getElementById('prog').style.width='0%';
+  document.getElementById('qnum').textContent='0';
+  setErr('');
+  document.querySelectorAll('.answer-btn').forEach(el=>el.disabled=false);
+  document.getElementById('givebtn').disabled=false;
+  show('loading');
+  try{
+    const init=[{role:'user',content:'ゲームを始めます。このゲームでは、ユーザーは「はい」「いいえ」「部分的にそう」「そうじゃない」「不明」の5択で答えます。最初の質問を1つだけ、余計な前置きなしで簡潔にしてください。'}];
+    const rep=await api(init);
+    hist=[{role:'user',content:'ゲームを始めます。このゲームでは、ユーザーは「はい」「いいえ」「部分的にそう」「そうじゃない」「不明」の5択で答えます。最初の質問を1つだけ、余計な前置きなしで簡潔にしてください。'},{role:'assistant',content:rep}];
+    document.getElementById('log').innerHTML='';
+    currentQText=rep;
+    document.getElementById('q-no').textContent='第1問';
+    document.getElementById('q-bubble').textContent=rep;
+    questionCount=1;
+    document.getElementById('qnum').textContent='1';
+    show('game');
+  }catch(e){
+    console.error(e);
+    revertPlay();show('title');updateBadge();
+    alert('通信エラーが発生しました。しばらくしてからお試しください。\n'+e.message);
+  }
+}
+
+async function askQ(answer){
+  if(!answer||busy)return;
+  const q=answer.trim();
+  if(!VALID_ANSWERS.includes(q)){
+    setErr('回答は「はい」「いいえ」「部分的にそう」「そうじゃない」「不明」のいずれかで入力してください。');
+    return;
+  }
+  setErr('');
+  busy=true;
+  document.querySelectorAll('.answer-btn').forEach(el=>el.disabled=true);
+  document.getElementById('givebtn').disabled=true;
+  qCount++;
+  document.getElementById('qnum').textContent=qCount;
+  document.getElementById('prog').style.width=(qCount/MAX_Q*100)+'%';
+  // 履歴に追加
+  const log=document.getElementById('log');
+  const hist_item=document.createElement('div');hist_item.className='log-hist';
+  hist_item.innerHTML=`<b>Q${qCount}.</b>&nbsp;${esc(currentQText)}&nbsp;→&nbsp;<b>${esc(q)}</b>`;
+  log.appendChild(hist_item);
+  log.scrollTop=log.scrollHeight;
+  // 吹き出しをローディングに
+  document.getElementById('q-bubble').textContent='…';
+  document.getElementById('q-no').textContent=`第${qCount+1}問`;
+  try{
+    hist.push({role:'user',content:q});
+    if(qCount>=MAX_Q){await giveUp(true);return;}
+    const rep=await api(hist);
+    hist.push({role:'assistant',content:rep});
+    currentQText=rep;
+    document.getElementById('q-bubble').textContent=rep;
+    document.getElementById('q-no').textContent=`第${qCount+1}問`;
+  }catch(e){
+    console.error(e);
+    document.getElementById('q-bubble').textContent='エラーが発生しました。もう一度お試しください。';
+    setErr('通信エラーが発生しました。もう一度お試しください。');
+    qCount--;
+    document.getElementById('qnum').textContent=qCount;
+    document.getElementById('prog').style.width=(qCount/MAX_Q*100)+'%';
+  }
+  busy=false;document.querySelectorAll('.answer-btn').forEach(el=>el.disabled=false);document.getElementById('givebtn').disabled=false;
+}
+
+async function giveUp(auto=false){
+  if(busy&&!auto)return;
+  busy=true;
+  document.querySelectorAll('.answer-btn').forEach(el=>el.disabled=true);
+  document.getElementById('givebtn').disabled=true;
+  show('reveal');
+  document.getElementById('reveal-card').textContent='仲人が紹介文を用意しています…';
+  const prompt=auto?`これまでの会話から、あなたが選んだキャラクターを紹介してください。`:'ユーザーが降参しました。選んだキャラクターを紹介してください。';
+  try{
+    hist.push({role:'user',content:prompt});
+    const rep=await api(hist);
+    document.getElementById('reveal-card').textContent=rep;
+  }catch(e){
+    console.error(e);
+    document.getElementById('reveal-card').textContent='エラーが発生しました。申し訳ありません。';
+  }
+  const r=rem();
+  document.getElementById('fin-msg').textContent=MAX_DAY>=999? '本日のご縁はまだあります。' : (r>0?`本日残り ${r} 回`:'本日のご縁は結び終えました。また明日どうぞ。');
+  busy=false;
+}
+
+function backToTitle(){show('title');updateBadge();}
+
+function getCharInfo(){
+  const text=document.getElementById('reveal-card').textContent;
+  const name=(text.match(/名前[：:]\s*([^\s　\n、。]+)/)||[])[1]||'';
+  const work=(text.match(/作品[：:]\s*([^\s　\n、。]+)/)||[])[1]||'';
+  return{name,work};
+}
+function searchChar(){
+  const{name,work}=getCharInfo();
+  window.open('https://www.google.com/search?q='+encodeURIComponent((name&&work)?`${name} ${work}`:name||'キャラクター'),'_blank');
+}
+function shareX(){
+  const{name,work}=getCharInfo();
+  const msg=`NAKOUDOで${name}（${work}）に出会いました！ #NAKOUDO\nhttps://nakoudo.vercel.app`;
+  window.open('https://twitter.com/intent/tweet?text='+encodeURIComponent(msg),'_blank');
+}
+function shareLINE(){
+  const{name,work}=getCharInfo();
+  const msg=`NAKOUDOで${name}（${work}）に出会いました！\nhttps://nakoudo.vercel.app`;
+  window.open('https://line.me/R/msg/text/?'+encodeURIComponent(msg),'_blank');
+}
+function shareNative(){
+  const{name,work}=getCharInfo();
+  const msg=`NAKOUDOで${name}（${work}）に出会いました！ #NAKOUDO`;
+  if(navigator.share){navigator.share({title:'NAKOUDO',text:msg,url:'https://nakoudo.vercel.app'});}
+  else{navigator.clipboard.writeText(msg).then(()=>alert('クリップボードにコピーしました！'));}
+}
+
+// 性愛対象選択処理
+document.querySelectorAll('.gender-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.gender-btn').forEach(b => b.classList.remove('selected'));
+    btn.classList.add('selected');
+    selectedGender = btn.dataset.gender;
+    document.getElementById('start-btn').disabled = false;
+  });
+});
+
+updateBadge();
+</script>
