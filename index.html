@@ -88,6 +88,12 @@
 .like-btn{flex:1;background:linear-gradient(135deg,#e91e63,#c2185b);color:white;border:none;padding:12px;font-size:14px;border-radius:50px;font-family:inherit;cursor:pointer;}
 .like-btn:hover{opacity:.88;}
 .fin-msg{font-size:12px;color:#ccc;text-align:center;}
+.ad-btn{background:none;border:1.5px dashed #f48fb1;color:#e91e63;padding:9px 16px;font-size:13px;border-radius:50px;font-family:inherit;cursor:pointer;width:100%;margin-bottom:.5rem;}
+.ad-btn:hover{background:#fce4ec;}
+.ad-btn:disabled{opacity:.4;cursor:not-allowed;}
+.ad-countdown{font-size:13px;color:#f48fb1;text-align:center;margin-bottom:.5rem;}
+.kofi-btn{display:block;text-align:center;color:#f48fb1;font-size:12px;text-decoration:none;margin-top:.3rem;opacity:.7;}
+.kofi-btn:hover{opacity:1;}
 .exh-wrap{text-align:center;padding:2rem 1rem;}
 .exh-title{font-family:'Hiragino Mincho ProN','Yu Mincho','Georgia',serif;font-size:20px;color:#c2185b;margin-bottom:.8rem;}
 .exh-msg{font-size:14px;color:#888;line-height:1.9;}
@@ -159,7 +165,10 @@
         </div>
         <div class="title-desc">仲人の質問に5択で答えて、あなたの好みに合ったキャラクターを絞り込みます。<br><span style="font-size:11px;color:#bbb;">Answer 5-choice questions to find your perfect anime character match.</span></div>
         <div id="rem-badge" class="badge">本日のご縁 残り 2回</div>
+        <button class="ad-btn" id="ad-btn" onclick="watchAd()" style="display:none;">📺 動画を見て+1回ご縁を増やす</button>
+        <div class="ad-countdown" id="ad-countdown" style="display:none;"></div>
         <button class="main-btn" id="start-btn" onclick="startGame()" disabled>♡ お見合いを始める</button>
+        <a href="https://ko-fi.com/nakoudo" target="_blank" class="kofi-btn">☕ NAKOUDOを応援する</a>
       </div>
     </div>
   </div>
@@ -342,7 +351,36 @@ function rem(){return MAX_DAY>=999?Infinity:Math.max(0,MAX_DAY-gs().count);}
 function usePlay(){const d=gs();d.count++;ss(d);}
 function revertPlay(){const d=gs();d.count=Math.max(0,d.count-1);ss(d);}
 function show(id){document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));document.getElementById('s-'+id).classList.add('active');}
-function updateBadge(){document.getElementById('rem-badge').textContent=MAX_DAY>=999?'本日のご縁 無制限':`本日のご縁 残り ${rem()}回`;}
+function updateBadge(){
+  const r=rem();
+  document.getElementById('rem-badge').textContent=MAX_DAY>=999?'本日のご縁 無制限':`本日のご縁 残り ${r}回`;
+  const adBtn=document.getElementById('ad-btn');
+  const adUsed=localStorage.getItem('nkd_ad_'+new Date().toDateString());
+  if(MAX_DAY<999&&r<=0&&!adUsed){adBtn.style.display='block';}else{adBtn.style.display='none';}
+}
+
+function watchAd(){
+  const adBtn=document.getElementById('ad-btn');
+  const cdEl=document.getElementById('ad-countdown');
+  adBtn.disabled=true;
+  cdEl.style.display='block';
+  let sec=15;
+  cdEl.textContent=`広告視聴中… ${sec}秒`;
+  const t=setInterval(()=>{
+    sec--;
+    if(sec<=0){
+      clearInterval(t);
+      cdEl.style.display='none';
+      adBtn.style.display='none';
+      localStorage.setItem('nkd_ad_'+new Date().toDateString(),'1');
+      const d=gs();d.count=Math.max(0,d.count-1);ss(d);
+      updateBadge();
+      document.getElementById('start-btn').disabled=!document.querySelector('.gender-btn.selected');
+    }else{
+      cdEl.textContent=`広告視聴中… ${sec}秒`;
+    }
+  },1000);
+}
 function esc(t){return t.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
 function setErr(msg){const el=document.getElementById('errmsg');if(!el)return;el.textContent=msg;el.style.display=msg?'block':'none';}
 
