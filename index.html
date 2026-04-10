@@ -433,7 +433,7 @@ async function startGame(){
   }catch(e){
     console.error(e);
     revertPlay();show('title');updateBadge();
-    alert('通信エラーが発生しました。しばらくしてからお試しください。\n'+e.message);
+    if(e.message!=='rate_limit')alert('通信エラーが発生しました。しばらくしてからお試しください。');
   }
 }
 

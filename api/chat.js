@@ -1,4 +1,6 @@
 const MAX_PER_DAY = 2;
+const MODEL = 'claude-haiku-4-5-20251001';
+const MAX_TOKENS = 300;
 
 async function kvGet(key) {
   const res = await fetch(`${process.env.UPSTASH_REDIS_REST_URL}/get/${key}`, {
@@ -38,8 +40,9 @@ export default async function handler(req, res) {
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
-  // IP取得
-  const ip = (req.headers['x-forwarded-for'] || '').split(',')[0].trim() || 'unknown';
+  // IP取得（英数字・ドット・コロンのみ許可してサニタイズ）
+  const rawIp = (req.headers['x-forwarded-for'] || '').split(',')[0].trim();
+  const ip = /^[a-fA-F0-9.:]+$/.test(rawIp) ? rawIp : 'unknown';
   const key = getTodayKey(ip);
 
   try {
@@ -49,8 +52,14 @@ export default async function handler(req, res) {
       return res.status(429).json({ error: 'rate_limit', message: '本日のご縁は結び終えました。また明日どうぞ。' });
     }
 
-    // Anthropic APIに送信
+    // Anthropic APIに送信（model/system/max_tokensはサーバー側で固定）
     const body = typeof req.body === 'string' ? JSON.parse(req.body) : req.body;
+    const payload = {
+      model: MODEL,
+      max_tokens: MAX_TOKENS,
+      system: body.system,
+      messages: body.messages,
+    };
     const response = await fetch('https://api.anthropic.com/v1/messages', {
       method: 'POST',
       headers: {
@@ -58,7 +67,7 @@ export default async function handler(req, res) {
         'anthropic-version': '2023-06-01',
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify(body),
+      body: JSON.stringify(payload),
     });
 
     const data = await response.json();
@@ -77,6 +86,6 @@ export default async function handler(req, res) {
 
   } catch (error) {
     console.error('API Error:', error);
-    return res.status(500).json({ error: 'Internal server error', message: error.message });
+    return res.status(500).json({ error: 'Internal server error' });
   }
 }
