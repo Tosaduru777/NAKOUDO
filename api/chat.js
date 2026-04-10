@@ -49,12 +49,6 @@ export default async function handler(req, res) {
       return res.status(429).json({ error: 'rate_limit', message: '本日のご縁は結び終えました。また明日どうぞ。' });
     }
 
-    // カウントアップ（初回なら翌日0時にキー削除）
-    const newCount = await kvIncr(key);
-    if (newCount === 1) {
-      await kvExpireAt(key, getMidnightUnix());
-    }
-
     // Anthropic APIに送信
     const body = typeof req.body === 'string' ? JSON.parse(req.body) : req.body;
     const response = await fetch('https://api.anthropic.com/v1/messages', {
@@ -70,6 +64,14 @@ export default async function handler(req, res) {
     const data = await response.json();
     if (!response.ok) {
       return res.status(response.status).json(data);
+    }
+
+    // 成功時のみカウントアップ（ゲーム開始の最初のメッセージのみカウント）
+    if(body.messages && body.messages.length === 1) {
+      const newCount = await kvIncr(key);
+      if (newCount === 1) {
+        await kvExpireAt(key, getMidnightUnix());
+      }
     }
     return res.status(200).json(data);
 
