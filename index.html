@@ -514,8 +514,9 @@ function searchChar(){
 }
 function shareX(){
   const{name,work}=getCharInfo();
-  const msg=`NAKOUDOで${name}（${work}）に出会いました！ #NAKOUDO\nhttps://nakoudo.vercel.app`;
-  window.open('https://twitter.com/intent/tweet?text='+encodeURIComponent(msg),'_blank');
+  const msg=`NAKOUDOで${name}（${work}）に出会いました！`;
+  const params=new URLSearchParams({text:msg,url:'https://nakoudo.vercel.app',hashtags:'NAKOUDO'});
+  window.open('https://twitter.com/intent/tweet?'+params,'_blank');
 }
 function shareLINE(){
   const{name,work}=getCharInfo();
