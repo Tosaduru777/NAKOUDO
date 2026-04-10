@@ -1,14 +1,62 @@
+const MAX_PER_DAY = 2;
+
+async function kvGet(key) {
+  const res = await fetch(`${process.env.UPSTASH_REDIS_REST_URL}/get/${key}`, {
+    headers: { Authorization: `Bearer ${process.env.UPSTASH_REDIS_REST_TOKEN}` },
+  });
+  const data = await res.json();
+  return data.result;
+}
+
+async function kvIncr(key) {
+  const res = await fetch(`${process.env.UPSTASH_REDIS_REST_URL}/incr/${key}`, {
+    headers: { Authorization: `Bearer ${process.env.UPSTASH_REDIS_REST_TOKEN}` },
+  });
+  const data = await res.json();
+  return data.result;
+}
+
+async function kvExpireAt(key, unixSec) {
+  await fetch(`${process.env.UPSTASH_REDIS_REST_URL}/expireat/${key}/${unixSec}`, {
+    headers: { Authorization: `Bearer ${process.env.UPSTASH_REDIS_REST_TOKEN}` },
+  });
+}
+
+function getTodayKey(ip) {
+  const today = new Date().toISOString().slice(0, 10); // YYYY-MM-DD
+  return `nakoudo:${ip}:${today}`;
+}
+
+function getMidnightUnix() {
+  const now = new Date();
+  const midnight = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate() + 1));
+  return Math.floor(midnight.getTime() / 1000);
+}
+
 export default async function handler(req, res) {
-  // POSTメソッドのみ許可
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
+  // IP取得
+  const ip = (req.headers['x-forwarded-for'] || '').split(',')[0].trim() || 'unknown';
+  const key = getTodayKey(ip);
+
   try {
-    // リクエストボディをパース
-    const body = typeof req.body === 'string' ? JSON.parse(req.body) : req.body;
+    // レート制限チェック
+    const count = parseInt(await kvGet(key) || '0', 10);
+    if (count >= MAX_PER_DAY) {
+      return res.status(429).json({ error: 'rate_limit', message: '本日のご縁は結び終えました。また明日どうぞ。' });
+    }
+
+    // カウントアップ（初回なら翌日0時にキー削除）
+    const newCount = await kvIncr(key);
+    if (newCount === 1) {
+      await kvExpireAt(key, getMidnightUnix());
+    }
 
     // Anthropic APIに送信
+    const body = typeof req.body === 'string' ? JSON.parse(req.body) : req.body;
     const response = await fetch('https://api.anthropic.com/v1/messages', {
       method: 'POST',
       headers: {
@@ -19,21 +67,14 @@ export default async function handler(req, res) {
       body: JSON.stringify(body),
     });
 
-    // APIレスポンスをパース
     const data = await response.json();
-
-    // エラーチェック
     if (!response.ok) {
       return res.status(response.status).json(data);
     }
-
-    // 成功レスポンス
     return res.status(200).json(data);
+
   } catch (error) {
     console.error('API Error:', error);
-    return res.status(500).json({ 
-      error: 'Internal server error',
-      message: error.message 
-    });
+    return res.status(500).json({ error: 'Internal server error', message: error.message });
   }
 }

@@ -354,6 +354,7 @@ async function api(messages){
     },
     body:JSON.stringify({model:'claude-haiku-4-5-20251001',max_tokens:300,system:getSYS(),messages})
   });
+  if(r.status===429){show('exh');throw new Error('rate_limit');}
   if(!r.ok){const e=await r.text();throw new Error(`API error ${r.status}: ${e}`);}
   const d=await r.json();
   if(!d.content||!d.content[0])throw new Error('レスポンス形式エラー');
