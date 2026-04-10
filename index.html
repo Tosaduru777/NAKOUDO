@@ -354,9 +354,10 @@ function show(id){document.querySelectorAll('.screen').forEach(s=>s.classList.re
 function updateBadge(){
   const r=rem();
   document.getElementById('rem-badge').textContent=MAX_DAY>=999?'本日のご縁 無制限':`本日のご縁 残り ${r}回`;
-  const adBtn=document.getElementById('ad-btn');
-  const adUsed=localStorage.getItem('nkd_ad_'+new Date().toDateString());
-  if(MAX_DAY<999&&r<=0&&!adUsed){adBtn.style.display='block';}else{adBtn.style.display='none';}
+  // 広告機能は審査後に有効化予定
+  // const adBtn=document.getElementById('ad-btn');
+  // const adUsed=localStorage.getItem('nkd_ad_'+new Date().toDateString());
+  // if(MAX_DAY<999&&r<=0&&!adUsed){adBtn.style.display='block';}else{adBtn.style.display='none';}
 }
 
 function watchAd(){
