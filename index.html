@@ -134,6 +134,8 @@
 .ss-btn.x-btn:hover{background:#333;}
 .ss-btn.line-btn{background:#06c755;color:white;border-color:#06c755;}
 .ss-btn.line-btn:hover{background:#05b34c;}
+.ss-btn.misskey-btn{background:#86b300;color:white;border-color:#86b300;}
+.ss-btn.misskey-btn:hover{background:#6d9200;}
 </style>
 
 <div class="bg"><div class="page-header"><div class="page-link" onclick="backToTitle()" role="button" tabindex="0">NAKOUDO</div></div><div class="app">
@@ -295,6 +297,7 @@
         <button class="ss-btn" onclick="searchChar()">🔍 検索する</button>
         <button class="ss-btn x-btn" onclick="shareX()">𝕏 ポスト</button>
         <button class="ss-btn line-btn" onclick="shareLINE()">LINE</button>
+        <button class="ss-btn misskey-btn" onclick="shareMisskey()">🌸 Misskey</button>
         <button class="ss-btn" id="insta-btn" onclick="shareNative()">📷 シェア</button>
       </div>
       <div class="btn-row">
@@ -530,6 +533,12 @@ function shareX(){
   const msg=`NAKOUDOで${name}（${work}）に出会いました！`;
   const params=new URLSearchParams({text:msg,url:'https://nakoudo.vercel.app',hashtags:'NAKOUDO'});
   window.open('https://twitter.com/intent/tweet?'+params,'_blank');
+}
+function shareMisskey(){
+  const{name,work}=getCharInfo();
+  const msg=`NAKOUDOで${name}（${work}）に出会いました！ #NAKOUDO`;
+  const params=new URLSearchParams({text:msg,url:'https://nakoudo.vercel.app',visibility:'public'});
+  window.open('https://misskey-hub.net/share?'+params,'_blank');
 }
 function shareLINE(){
   const{name,work}=getCharInfo();
